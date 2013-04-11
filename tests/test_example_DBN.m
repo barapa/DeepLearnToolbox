@@ -26,6 +26,10 @@ opts.batchsize = 100;
 opts.momentum  =   0;
 opts.alpha     =   1;
 dbn = dbnsetup(dbn, train_x, opts);
+
+% to train on each song individually, we can just keep calling dbntrain
+% on successive train_x matrices, where each one is the next song to train
+% on
 dbn = dbntrain(dbn, train_x, opts);
 
 %unfold dbn to nn
