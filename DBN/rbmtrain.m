@@ -3,13 +3,16 @@ function rbm = rbmtrain(rbm, x, opts)
     m = size(x, 1);
     numbatches = m / opts.batchsize;
     
-    assert(rem(numbatches, 1) == 0, 'numbatches not integer');
+    % this check is no longer necessary
+    % assert(rem(numbatches, 1) == 0, 'numbatches not integer');
 
     for i = 1 : opts.numepochs
         kk = randperm(m);
         err = 0;
         for l = 1 : numbatches
-            batch = x(kk((l - 1) * opts.batchsize + 1 : l * opts.batchsize), :);
+            batch_start_ind = (l - 1) * opts.batchsize + 1;
+            batch_end_ind = min(l * opts.batchsize, numel(kk));
+            batch = x(kk(batch_start_ind : batch_end_ind), :);
             
             v1 = batch;
             h1 = sigmrnd(repmat(rbm.c', opts.batchsize, 1) + v1 * rbm.W');
