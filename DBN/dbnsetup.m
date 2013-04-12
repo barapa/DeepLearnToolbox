@@ -7,6 +7,8 @@ function dbn = dbnsetup(dbn, x, opts)
         dbn.rbm{u}.momentum = opts.momentum;
 
         dbn.rbm{u}.W  = zeros(dbn.sizes(u + 1), dbn.sizes(u));
+        % vW holds the delta for each weight update, for use with momentum
+        % calculations
         dbn.rbm{u}.vW = zeros(dbn.sizes(u + 1), dbn.sizes(u));
 
         dbn.rbm{u}.b  = zeros(dbn.sizes(u), 1);
