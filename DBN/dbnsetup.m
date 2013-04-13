@@ -1,5 +1,5 @@
 function dbn = dbnsetup(dbn, x, opts)
-    rand_weight_sigma = 0.01;
+    rand_weight_sigma = 0.001;
     
     n = size(x, 2);
     dbn.sizes = [n, dbn.sizes];
@@ -25,7 +25,7 @@ function dbn = dbnsetup(dbn, x, opts)
         if u == 1 && dbn.gaussian_visible_units
             dbn.rbm{u}.gaussian_visible_units = 1;
         else
-            dbn.rbm{u}.gaussian_visible_units = 1;
+            dbn.rbm{u}.gaussian_visible_units = 0;
         end
     end
 
