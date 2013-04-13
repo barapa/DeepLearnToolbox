@@ -16,7 +16,13 @@ function rbm = rbmtrain(rbm, x, opts)
             
             v1 = batch;
             h1 = sigmrnd(repmat(rbm.c', opts.batchsize, 1) + v1 * rbm.W');
-            v2 = sigmrnd(repmat(rbm.b', opts.batchsize, 1) + h1 * rbm.W);
+            
+            if rbm.gaussian_visible_units
+                v2 = mvnrnd(repmat(rbm.b', opts.batchsize, 1) + h1 * rbm.W,...
+                    eye(size(v1, 2)));
+            else
+                v2 = sigmrnd(repmat(rbm.b', opts.batchsize, 1) + h1 * rbm.W);
+            end
             h2 = sigmrnd(repmat(rbm.c', opts.batchsize, 1) + v2 * rbm.W');
 
             c1 = h1' * v1;
