@@ -20,6 +20,13 @@ function dbn = dbnsetup(dbn, x, opts)
         dbn.rbm{u}.c  = mvnrnd(zeros(dbn.sizes(u + 1), 1),...
             rand_weight_sigma);
         dbn.rbm{u}.vc = zeros(dbn.sizes(u + 1), 1);
+        
+        % set the lowest rbm to gaussian if specified
+        if u == 1 && dbn.gaussian_visible_units
+            dbn.rbm{u}.gaussian_visible_units = 1;
+        else
+            dbn.rbm{u}.gaussian_visible_units = 1;
+        end
     end
 
 end
