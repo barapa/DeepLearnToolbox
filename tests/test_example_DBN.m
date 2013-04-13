@@ -21,7 +21,7 @@ figure; visualize(dbn.rbm{1}.W');   %  Visualize the RBM weights
 rng(0);
 %train dbn
 dbn.sizes = [100 100];
-opts.numepochs =   1;
+opts.numepochs =   10;
 opts.batchsize = 100;
 opts.momentum  =   0;
 opts.alpha     =   1;
