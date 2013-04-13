@@ -9,11 +9,11 @@ test_y  = double(test_y);
 %%  ex1 train a 100 hidden unit RBM and visualize its weights
 rng(0);
 dbn.sizes = [100];
-dbn.gaussian_visible_units = 0;
+dbn.gaussian_visible_units = 1;
 opts.numepochs =   1;
 opts.batchsize = 100;
-opts.momentum  =   0;
-opts.alpha     =   1;
+opts.momentum  =   .5;
+opts.alpha     =   .0001;
 dbn = dbnsetup(dbn, train_x, opts);
 dbn = dbntrain(dbn, train_x, opts);
 figure; visualize(dbn.rbm{1}.W');   %  Visualize the RBM weights
@@ -22,11 +22,12 @@ figure; visualize(dbn.rbm{1}.W');   %  Visualize the RBM weights
 rng(0);
 %train dbn
 dbn.sizes = [100 100];
-dbn.gaussian_visible_units = 0;
+dbn.gaussian_visible_units = 1;
 opts.numepochs =   10;
 opts.batchsize = 100;
-opts.momentum  =   0;
-opts.alpha     =   1;
+opts.momentum  =   .5;
+opts.alpha     =   .001;
+train_x = whiten(train_x, .1);
 dbn = dbnsetup(dbn, train_x, opts);
 
 % to train on each song individually, we can just keep calling dbntrain
