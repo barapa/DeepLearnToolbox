@@ -9,6 +9,7 @@ test_y  = double(test_y);
 %%  ex1 train a 100 hidden unit RBM and visualize its weights
 rng(0);
 dbn.sizes = [100];
+dbn.gaussian_visible_units = 0;
 opts.numepochs =   1;
 opts.batchsize = 100;
 opts.momentum  =   0;
@@ -21,6 +22,7 @@ figure; visualize(dbn.rbm{1}.W');   %  Visualize the RBM weights
 rng(0);
 %train dbn
 dbn.sizes = [100 100];
+dbn.gaussian_visible_units = 0;
 opts.numepochs =   10;
 opts.batchsize = 100;
 opts.momentum  =   0;
