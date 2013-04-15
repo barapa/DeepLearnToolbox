@@ -1,7 +1,7 @@
 function rbm = rbmtrain(rbm, x, opts)
     assert(isfloat(x), 'x must be a float');
     m = size(x, 1);
-    numbatches = m / opts.batchsize;
+    numbatches = (m / opts.batchsize);
     
     % this check is no longer necessary
     % assert(rem(numbatches, 1) == 0, 'numbatches not integer');

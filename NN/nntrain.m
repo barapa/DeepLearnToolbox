@@ -36,7 +36,7 @@ m = size(train_x, 1);
 batchsize = opts.batchsize;
 numepochs = opts.numepochs;
 
-numbatches = m / batchsize;
+numbatches = ceil(m / batchsize);
 
 % this check is no longer necessary
 %assert(rem(numbatches, 1) == 0, 'numbatches must be a integer');
