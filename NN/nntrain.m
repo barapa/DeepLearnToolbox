@@ -47,14 +47,16 @@ for i = 1 : numepochs
     
     kk = randperm(m);
     for l = 1 : numbatches
-        batch_x = train_x(kk((l - 1) * batchsize + 1 : l * batchsize), :);
+        batch_start_ind = (l - 1) * batchsize + 1;
+        batch_end_ind = min(l * batchsize, numel(kk));
+        batch_x = train_x(kk(batch_start_ind : batch_end_ind), :);
         
         %Add noise to input (for use in denoising autoencoder)
         if(nn.inputZeroMaskedFraction ~= 0)
             batch_x = batch_x.*(rand(size(batch_x))>nn.inputZeroMaskedFraction);
         end
         
-        batch_y = train_y(kk((l - 1) * batchsize + 1 : l * batchsize), :);
+        batch_y = train_y(kk(batch_start_ind : batch_end_ind), :);
         
         nn = nnff(nn, batch_x, batch_y);
         nn = nnbp(nn);
