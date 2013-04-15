@@ -1,10 +1,18 @@
 function [nn, L]  = nntrain(nn, train_x, train_y, opts, val_x, val_y)
 %NNTRAIN trains a neural net
-% [nn, L] = nnff(nn, x, y, opts) trains the neural network nn with input x and
-% output y for opts.numepochs epochs, with minibatches of size
-% opts.batchsize. Returns a neural network nn with updated activations,
+% [nn, L] = nntrain(nn, x, y, opts, val_x, val_y) trains the neural network 
+% nn with input x and output y for opts.numepochs epochs, with minibatches
+% of size opts.batchsize. Returns a neural network nn with updated activations,
 % errors, weights and biases, (nn.a, nn.e, nn.W, nn.b) and L, the sum
 % squared error for each training minibatch.
+%
+% train_x : N x D matrix
+% train_y : N x L matrix, where L is the number of labels for one-hot
+%           encoding
+% val_x :   (optional) N x D matrix to be used for validation, but not
+%           training
+% val_y :   (optional) N x L matrix to be used for validation, but not
+%           training
 
 assert(isfloat(train_x), 'train_x must be a float');
 assert(nargin == 4 || nargin == 6,'number ofinput arguments must be 4 or 6')

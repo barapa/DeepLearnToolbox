@@ -1,4 +1,9 @@
+% function dbn = dbnsetup(dbn, x, opts)
+% 
+% x : N x D matrix
+
 function dbn = dbnsetup(dbn, x, opts)
+
     rand_weight_sigma = 0.001;
     
     n = size(x, 2);
