@@ -38,7 +38,8 @@ numepochs = opts.numepochs;
 
 numbatches = m / batchsize;
 
-assert(rem(numbatches, 1) == 0, 'numbatches must be a integer');
+% this check is no longer necessary
+%assert(rem(numbatches, 1) == 0, 'numbatches must be a integer');
 
 L = zeros(numepochs*numbatches,1);
 n = 1;
