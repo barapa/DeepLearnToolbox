@@ -1,6 +1,6 @@
 function [nn, L]  = nntrain(nn, train_x, train_y, opts, val_x, val_y)
 %NNTRAIN trains a neural net
-% [nn, L] = nntrain(nn, x, y, opts, val_x, val_y) trains the neural network 
+% [nn, L] = nntrain(nn, x, y, opts, val_x, val_y) trains the neural network
 % nn with input x and output y for opts.numepochs epochs, with minibatches
 % of size opts.batchsize. Returns a neural network nn with updated activations,
 % errors, weights and biases, (nn.a, nn.e, nn.W, nn.b) and L, the sum
@@ -38,38 +38,38 @@ numepochs = opts.numepochs;
 
 numbatches = ceil(m / batchsize);
 
-% this check is no longer necessary
-%assert(rem(numbatches, 1) == 0, 'numbatches must be a integer');
+L = [ ] ;
 
-L = zeros(numepochs*numbatches,1);
-n = 1;
+
 for i = 1 : numepochs
     tic;
-    
+
     kk = randperm(m);
-    for l = 1 : numbatches
-        batch_start_ind = (l - 1) * batchsize + 1;
-        batch_end_ind = min(l * batchsize, numel(kk));
-        batch_x = train_x(kk(batch_start_ind : batch_end_ind), :);
-        
-        %Add noise to input (for use in denoising autoencoder)
+    epoch_L = [ ] ;
+    for l = 1 : opts.batchsize : m
+        if l + opts.batchsize < length(kk)
+          batch_x = train_x(kk(l : l + opts.batchsize - 1), :) ;
+          batch_y = train_y(kk(l : l + opts.batchsize - 1), :) ;
+        else
+          batch_x = train_x(kk(l : end), :) ;
+          batch_y = train_y(kk(l : end), :) ;
+        end
+
+        % Add noise to input (for use in denoising autoencoder)
         if(nn.inputZeroMaskedFraction ~= 0)
             batch_x = batch_x.*(rand(size(batch_x))>nn.inputZeroMaskedFraction);
         end
-        
-        batch_y = train_y(kk(batch_start_ind : batch_end_ind), :);
-        
+
         nn = nnff(nn, batch_x, batch_y);
         nn = nnbp(nn);
         nn = nnapplygrads(nn);
-        
-        L(n) = nn.L;
-        
-        n = n + 1;
+
+        L = [ L, nn.L ] ;
+        epoch_L = [ epoch_L, nn.L ] ;
     end
-    
+
     t = toc;
-    
+
     if ishandle(fhandle)
         if opts.validation == 1
             loss = nneval(nn, loss, train_x, train_y, val_x, val_y);
@@ -78,8 +78,11 @@ for i = 1 : numepochs
         end
         nnupdatefigures(nn, fhandle, loss, opts, i);
     end
-        
-    disp(['epoch ' num2str(i) '/' num2str(opts.numepochs) '. Took ' num2str(t) ' seconds' '. Mean squared error on training set is ' num2str(mean(L((n-numbatches):(n-1))))]);
+
+    % TODO(sam): fix error message
+    disp(['epoch ' num2str(i) '/' num2str(opts.numepochs) '. Took ' ...
+        num2str(t) ' seconds' '. Mean squared error on training set is ' ...
+        num2str(mean(epoch_L))]);
     nn.learningRate = nn.learningRate * nn.scaling_learningRate;
 end
 end
