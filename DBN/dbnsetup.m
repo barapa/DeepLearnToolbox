@@ -10,7 +10,7 @@ function dbn = dbnsetup(dbn, x, opts)
     dbn.sizes = [n, dbn.sizes];
 
     for u = 1 : numel(dbn.sizes) - 1
-        dbn.rbm{u}.alpha    = opts.alpha;
+        dbn.rbm{u}.alpha    = opts.binary_learning_rate; % changed to gaussian rate below
         dbn.rbm{u}.momentum = opts.momentum;
 
         dbn.rbm{u}.W  = mvnrnd(zeros(dbn.sizes(u + 1), dbn.sizes(u)),...
@@ -26,9 +26,11 @@ function dbn = dbnsetup(dbn, x, opts)
             rand_weight_sigma);
         dbn.rbm{u}.vc = zeros(dbn.sizes(u + 1), 1);
         
-        % set the lowest rbm to gaussian if specified
+        % set the lowest rbm to gaussian if specified. Set learning rate to
+        % the gaussian rate also if specified.
         if u == 1 && dbn.gaussian_visible_units
             dbn.rbm{u}.gaussian_visible_units = 1;
+            dbn.rbm{u}.alpha = opts.gaussian_learning_rate;
         else
             dbn.rbm{u}.gaussian_visible_units = 0;
         end
