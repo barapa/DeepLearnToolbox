@@ -28,19 +28,19 @@ function rbm = rbmtrain(rbm, x, opts)
             v_raw{1} = batch;
             v_sample{1} = batch;
 
-            h_raw{1} = repmat(rbm.c', batchsize, 1) + v_1_raw{1} * rbm.W'
+            h_raw{1} = repmat(rbm.c', batchsize, 1) + v_raw{1} * rbm.W';
             h_sample{1} = sigmrnd(h_raw{1});
 
 
             for k = 2 : cdk + 1
-              h_raw{k} = repmat(rbm.c', batchsize, 1) + v_sample{k-1} * rbm.W'
-              h_sample{k} = sigmrnd(h_raw{k});
-              v_raw{k} = repmat(rbm.b', batchsize, 1) + h_sample{k} * rbm.W;
+              v_raw{k} = repmat(rbm.b', batchsize, 1) + h_sample{k-1} * rbm.W;
               if rbm.gaussian_visible_units
                 v_sample{k} = mvnrnd(v_raw{k}, eye(size(v_raw{k}, 2)));
               else
                 v_sample{k} = sigmrnd(v_raw{k});
               end
+              h_raw{k} = repmat(rbm.c', batchsize, 1) + v_sample{k} * rbm.W';
+              h_sample{k} = sigmrnd(h_raw{k});
             end % for k = 1 : cdk + 1
 
             % Currently, we use p(v | h) directly instead of its sample.
