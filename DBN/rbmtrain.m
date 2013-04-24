@@ -1,6 +1,10 @@
 function rbm = rbmtrain(rbm, x, opts)
     assert(isfloat(x), 'x must be a float');
     m = size(x, 1);
+    assert(isfield(opts, 'cdk'), 'must define cdk in training params!');
+    assert(opts.cdk >= 1, 'cdk must be integer >= 1!');
+    cdk = opts.cdk;
+
 
     for i = 1 : opts.numepochs
         kk = randperm(m);
@@ -14,31 +18,42 @@ function rbm = rbmtrain(rbm, x, opts)
             end
 
             batchsize = size(batch, 1);
-            v1 = batch;
 
-            h1 = sigmrnd(repmat(rbm.c', batchsize, 1) + v1 * rbm.W');
+            v_1 = batch;
+            v_k = batch;
+            v_k_raw = batch;
+            h_1 = sigmrnd(repmat(rbm.c', batchsize, 1) + v_1 * rbm.W');
+            h_k = h_1;
 
-            if rbm.gaussian_visible_units
-                v2 = mvnrnd(repmat(rbm.b', batchsize, 1) + h1 * rbm.W,...
-                    eye(size(v1, 2)));
-            else
-                v2 = sigmrnd(repmat(rbm.b', batchsize, 1) + h1 * rbm.W);
-            end
+            c_1 = h_1' * v_1;
 
-            h2 = sigmrnd(repmat(rbm.c', batchsize, 1) + v2 * rbm.W');
+            for k = 1 : cdk
+                h_k = sigmrnd(repmat(rbm.c', batchsize, 1) + v_k * rbm.W');
+                v_k_raw = repmat(rbm.b', batchsize, 1) + h_k * rbm.W;
 
-            c1 = h1' * v1;
-            c2 = h2' * v2;
+                if rbm.gaussian_visible_units
+                  v_k = mvnrnd(v_k_raw, eye(size(v_k, 2))) ;
+                else
+                  v_k = sigmrnd(v_k_raw);
+                end % if rbm.gaussian_visible_units
 
-            rbm.vW = rbm.momentum * rbm.vW + rbm.alpha * (c1 - c2)     / batchsize ;
-            rbm.vb = rbm.momentum * rbm.vb + rbm.alpha * sum(v1 - v2)' / batchsize ;
-            rbm.vc = rbm.momentum * rbm.vc + rbm.alpha * sum(h1 - h2)' / batchsize ;
+            end % for k = 1 : cdk
+
+            % Currently, we use p(v | h) directly instead of its sample.
+            c_k = h_k' * v_k_raw;
+
+            rbm.vW = ...
+                rbm.momentum * rbm.vW + rbm.alpha * (c_1 - c_k) / batchsize;
+            rbm.vb = ...
+                rbm.momentum * rbm.vb + rbm.alpha * sum(v_1 - v_k)' / batchsize;
+            rbm.vc = ...
+                rbm.momentum * rbm.vc + rbm.alpha * sum(h_1 - h_k)' / batchsize;
 
             rbm.W = rbm.W + rbm.vW;
             rbm.b = rbm.b + rbm.vb;
             rbm.c = rbm.c + rbm.vc;
 
-            err = err + sum(sum((v1 - v2) .^ 2)) / batchsize ;
+            err = err + sum(sum((v_1 - v_k) .^ 2)) / batchsize ;
             numbatches = numbatches + 1 ;
         end
 
