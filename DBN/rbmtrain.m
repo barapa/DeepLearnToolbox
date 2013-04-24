@@ -46,15 +46,17 @@ function rbm = rbmtrain(rbm, x, opts)
             % Currently, we use p(v | h) directly instead of its sample.
             % switch h_sample to h_raw to use raw h for updates, which Hinton
             % says can speed up learning. p(h | v)
-            phase_pos = h_sample{1}' * v_sample{1}; 
-            phase_neg = h_sample{cdk + 1}' * v_sample{cdk + 1};
+            phase_pos = h_sample{1}' * sigm(v_raw{1}); 
+            phase_neg = h_sample{cdk + 1}' * sample(v_raw{cdk + 1});
 
             rbm.vW = ...
               rbm.momentum * rbm.vW + rbm.alpha * (phase_pos - phase_neg) / batchsize;
             rbm.vb = ...
-              rbm.momentum * rbm.vb + rbm.alpha * sum(v_sample{1} - v_sample{cdk + 1})' / batchsize;
+              rbm.momentum * rbm.vb + rbm.alpha * sum(sigm(v_raw{1}) -...
+              sigm(v_raw{cdk + 1}))' / batchsize;
             rbm.vc = ...
-              rbm.momentum * rbm.vc + rbm.alpha * sum(h_sample{1} - h_sample{cdk + 1})' / batchsize;
+              rbm.momentum * rbm.vc + rbm.alpha * sum(h_sample{1} -...
+              h_sample{cdk + 1})' / batchsize;
 
             rbm.W = rbm.W + rbm.vW;
             rbm.b = rbm.b + rbm.vb;
