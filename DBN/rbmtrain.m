@@ -19,41 +19,48 @@ function rbm = rbmtrain(rbm, x, opts)
 
             batchsize = size(batch, 1);
 
-            v_1 = batch;
-            v_k = batch;
-            v_k_raw = batch;
-            h_1 = sigmrnd(repmat(rbm.c', batchsize, 1) + v_1 * rbm.W');
-            h_k = h_1;
+            v_raw = cell(cdk + 1, 1);
+            v_sample = cell(cdk + 1, 1);
 
-            c_1 = h_1' * v_1;
+            h_raw = cell(cdk + 1, 1);
+            h_sample = cell(cdk + 1, 1);
 
-            for k = 1 : cdk
-                h_k = sigmrnd(repmat(rbm.c', batchsize, 1) + v_k * rbm.W');
-                v_k_raw = repmat(rbm.b', batchsize, 1) + h_k * rbm.W;
+            v_raw{1} = batch;
+            v_sample{1} = batch;
 
-                if rbm.gaussian_visible_units
-                  v_k = mvnrnd(v_k_raw, eye(size(v_k, 2))) ;
-                else
-                  v_k = sigmrnd(v_k_raw);
-                end % if rbm.gaussian_visible_units
+            h_raw{1} = repmat(rbm.c', batchsize, 1) + v_1_raw{1} * rbm.W'
+            h_sample{1} = sigmrnd(h_raw{1});
 
-            end % for k = 1 : cdk
+
+            for k = 2 : cdk + 1
+              h_raw{k} = repmat(rbm.c', batchsize, 1) + v_sample{k-1} * rbm.W'
+              h_sample{k} = sigmrnd(h_raw{k});
+              v_raw{k} = repmat(rbm.b', batchsize, 1) + h_sample{k} * rbm.W;
+              if rbm.gaussian_visible_units
+                v_sample{k} = mvnrnd(v_raw{k}, eye(size(v_raw{k}, 2)));
+              else
+                v_sample{k} = sigmrnd(v_raw{k});
+              end
+            end % for k = 1 : cdk + 1
 
             % Currently, we use p(v | h) directly instead of its sample.
-            c_k = h_k' * v_k_raw;
+            % switch h_sample to h_raw to use raw h for updates, which Hinton
+            % says can speed up learning. p(h | v)
+            phase_pos = h_sample{1}' * v_raw{1}; 
+            phase_neg = h_sample{cdk + 1}' * v_raw{cdk + 1};
 
             rbm.vW = ...
-                rbm.momentum * rbm.vW + rbm.alpha * (c_1 - c_k) / batchsize;
+              rbm.momentum * rbm.vW + rbm.alpha * (phase_pos - phase_neg) / batchsize;
             rbm.vb = ...
-                rbm.momentum * rbm.vb + rbm.alpha * sum(v_1 - v_k)' / batchsize;
+              rbm.momentum * rbm.vb + rbm.alpha * sum(v_raw{1} - v_raw{cdk + 1})' / batchsize;
             rbm.vc = ...
-                rbm.momentum * rbm.vc + rbm.alpha * sum(h_1 - h_k)' / batchsize;
+              rbm.momentum * rbm.vc + rbm.alpha * sum(h_sample{1} - h_sample{cdk + 1})' / batchsize;
 
             rbm.W = rbm.W + rbm.vW;
             rbm.b = rbm.b + rbm.vb;
             rbm.c = rbm.c + rbm.vc;
 
-            err = err + sum(sum((v_1 - v_k) .^ 2)) / batchsize ;
+            err = err + sum(sum((v_raw{1} - v_raw{cdk + 1}) .^ 2)) / batchsize ;
             numbatches = numbatches + 1 ;
         end
 
