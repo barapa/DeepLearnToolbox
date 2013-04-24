@@ -28,7 +28,7 @@ function rbm = rbmtrain(rbm, x, opts)
             v_raw{1} = batch;
             v_sample{1} = batch;
 
-            h_raw{1} = repmat(rbm.c', batchsize, 1) + v_raw{1} * rbm.W';
+            h_raw{1} = repmat(rbm.c', batchsize, 1) + v_sample{1} * rbm.W';
             h_sample{1} = sigmrnd(h_raw{1});
 
 
@@ -46,13 +46,13 @@ function rbm = rbmtrain(rbm, x, opts)
             % Currently, we use p(v | h) directly instead of its sample.
             % switch h_sample to h_raw to use raw h for updates, which Hinton
             % says can speed up learning. p(h | v)
-            phase_pos = h_sample{1}' * v_raw{1}; 
-            phase_neg = h_sample{cdk + 1}' * v_raw{cdk + 1};
+            phase_pos = h_sample{1}' * v_sample{1}; 
+            phase_neg = h_sample{cdk + 1}' * v_sample{cdk + 1};
 
             rbm.vW = ...
               rbm.momentum * rbm.vW + rbm.alpha * (phase_pos - phase_neg) / batchsize;
             rbm.vb = ...
-              rbm.momentum * rbm.vb + rbm.alpha * sum(v_raw{1} - v_raw{cdk + 1})' / batchsize;
+              rbm.momentum * rbm.vb + rbm.alpha * sum(v_sample{1} - v_sample{cdk + 1})' / batchsize;
             rbm.vc = ...
               rbm.momentum * rbm.vc + rbm.alpha * sum(h_sample{1} - h_sample{cdk + 1})' / batchsize;
 
@@ -60,7 +60,7 @@ function rbm = rbmtrain(rbm, x, opts)
             rbm.b = rbm.b + rbm.vb;
             rbm.c = rbm.c + rbm.vc;
 
-            err = err + sum(sum((v_raw{1} - v_raw{cdk + 1}) .^ 2)) / batchsize ;
+            err = err + sum(sum((v_sample{1} - v_sample{cdk + 1}) .^ 2)) / batchsize ;
             numbatches = numbatches + 1 ;
         end
 
