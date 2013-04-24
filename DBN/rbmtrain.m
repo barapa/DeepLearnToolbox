@@ -47,7 +47,7 @@ function rbm = rbmtrain(rbm, x, opts)
             % switch h_sample to h_raw to use raw h for updates, which Hinton
             % says can speed up learning. p(h | v)
             phase_pos = h_sample{1}' * sigm(v_raw{1}); 
-            phase_neg = h_sample{cdk + 1}' * sample(v_raw{cdk + 1});
+            phase_neg = h_sample{cdk + 1}' * sigm(v_raw{cdk + 1});
 
             rbm.vW = ...
               rbm.momentum * rbm.vW + rbm.alpha * (phase_pos - phase_neg) / batchsize;
