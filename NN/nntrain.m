@@ -1,4 +1,4 @@
-function [nn, L]  = nntrain(nn, train_x, train_y, opts, val_x, val_y)
+function [nn, L, opts]  = nntrain(nn, train_x, train_y, opts, val_x, val_y)
 %NNTRAIN trains a neural net
 % [nn, L] = nntrain(nn, x, y, opts, val_x, val_y) trains the neural network
 % nn with input x and output y for opts.numepochs epochs, with minibatches
@@ -17,18 +17,39 @@ function [nn, L]  = nntrain(nn, train_x, train_y, opts, val_x, val_y)
 assert(isfloat(train_x), 'train_x must be a float');
 assert(nargin == 4 || nargin == 6,'number ofinput arguments must be 4 or 6')
 
-loss.train.e               = [];
-loss.train.e_frac          = [];
-loss.val.e                 = [];
-loss.val.e_frac            = [];
+if isfield(opts, 'loss')
+  loss.train.e = opts.loss.train.e;
+  loss.train.e_frac = opts.loss.train.e_frac;
+  loss.val.e = opts.loss.val.e;
+  loss.val.e_frac = opts.loss.val.e_frac;
+else
+  loss.train.e               = [];
+  loss.train.e_frac          = [];
+  loss.val.e                 = [];
+  loss.val.e_frac            = [];
+end
+
+if ~isfield(opts, 'i')
+  opts.i = 0;
+end
+
 opts.validation = 0;
 if nargin == 6
     opts.validation = 1;
 end
 
 fhandle = [];
-if isfield(opts,'plot') && opts.plot == 1
+if isfield(opts, 'figure')
+    fhandle = opts.figure;
+elseif isfield(opts, 'plot') && opts.plot == 1
     fhandle = figure();
+    opts.figure = fhandle;
+end
+
+if ~isfield(opts, 'batch')
+  opts.batch = 0;
+else
+  opts.batch = opts.batch + 1;
 end
 
 m = size(train_x, 1);
@@ -76,7 +97,9 @@ for i = 1 : numepochs
         else
             loss = nneval(nn, loss, train_x, train_y);
         end
-        nnupdatefigures(nn, fhandle, loss, opts, i);
+        opts.loss = loss;
+        opts.i = opts.i + 1;
+        nnupdatefigures(nn, fhandle, loss, opts, opts.i);
     end
 
     % TODO(sam): fix error message
