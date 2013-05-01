@@ -16,7 +16,7 @@ function [nn, L, opts]  = nntrain(nn, train_x, train_y, opts, val_x, val_y,...
 %           training
 
 assert(isfloat(train_x), 'train_x must be a float');
-assert(nargin == 4 || nargin == 6,'number ofinput arguments must be 4 or 6')
+assert(nargin == 4 || nargin == 7,'number ofinput arguments must be 4 or 6')
 
 if isfield(opts, 'loss')
   loss.train.e = opts.loss.train.e;
